@@ -24,7 +24,21 @@ Concrete rules from that thread:
 - **`&` must be `&amp;`.** Unescaped ampersands cause the template to silently disappear from CA. Apply to all text content (descriptions, URLs with query strings, etc).
 - **`<Overview>` takes precedence over `<Description>`.** Per the schema thread, when both are present, "Description is completely ignored." We currently keep both because most modern CA templates do, but if the card ever shows the wrong text, consolidate into Overview and drop Description.
 - **At least one of `<Overview>` or `<Description>` is required and non-empty.** The card won't render without it.
-- **When in doubt, round-trip through dockerMan.** Test box: enable Authoring Mode, paste this template's URL into Add Container, hit Save with no edits. Diff the resulting XML against this repo's file. Any difference dockerMan introduces is the canonical shape; this repo should match.
+- **When in doubt, round-trip through dockerMan.** Test box: enable Authoring Mode, paste this template's URL into Add Container, hit Save with no edits. Diff the resulting XML against this repo's file. Any difference dockerMan introduces is the canonical shape; this repo should match. **Element ordering followed by this repo matches the dockerMan-7.2.4 output**:
+
+  ```
+  Name → Repository → Registry → Network → MyIP → Shell → Privileged →
+  Support → Project → ReadMe → [License → ExtraSearchTerms] → Overview →
+  Category → WebUI → TemplateURL → Icon → [Screenshot×N] → ExtraParams →
+  PostArgs → CPUset → DateInstalled → DonateText → DonateLink → Requires →
+  [Changes] → Config×N
+  ```
+
+  Tags in `[brackets]` are CA-only — dockerMan strips them on save (it doesn't know about them). They live in this repo's source XML, CA reads them from `<TemplateURL>` on its 2-hour poll, and the user's locally-saved copy will be stripped of them. That's expected: the locally-saved XML is dockerMan's runtime config, not the CA card source.
+
+- **Don't add v1 legacy blocks.** `<Networking>`, `<Data>`, `<Environment>`, `<Labels/>` are pre-6.10 schema. Unraid 6.10+ doesn't generate them on save and `<Config>` blocks supersede them entirely. Keeping them in the source XML is pure redundancy and risks drift if `<Config>` and v1 disagree.
+
+- **`<TailscaleStateDir/>`** appears in dockerMan-saved XML on Unraid 7.2+. Don't add it to the source — older Unraid versions don't recognize it. dockerMan adds it on save based on the host's Unraid version.
 
 ## Tag inventory
 
