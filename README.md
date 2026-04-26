@@ -1,5 +1,7 @@
 # Unraid Templates
 
+[![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/mmenanno/unraid-templates?utm_source=oss&utm_medium=github&utm_campaign=mmenanno%2Funraid-templates&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)](https://coderabbit.ai)
+
 Unraid Community Applications templates for containers I publish.
 
 ---
