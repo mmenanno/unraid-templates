@@ -15,7 +15,7 @@
   <Overview>Self-hosted bridge between Reddit Chat and a private Discord server. Reddit DMs land in per-conversation #dm-* channels with the sender's snoovatar; replies relay back under your Reddit identity. All config happens in the bcrypt-protected admin web UI after first run.</Overview>
   <Category>Network:Messenger Tools:System Status:Stable</Category>
   <WebUI>http://[IP]:[PORT:4567]/</WebUI>
-  <TemplateURL>https://raw.githubusercontent.com/mmenanno/unraid-templates/main/reddit_chat_bridge.xml</TemplateURL>
+  <TemplateURL>https://raw.githubusercontent.com/mmenanno/unraid-templates/main/templates/reddit_chat_bridge.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/mmenanno/reddit_chat_bridge/main/app/assets/icons/icon-1024.png</Icon>
   <Screenshot>https://raw.githubusercontent.com/mmenanno/reddit_chat_bridge/main/.github/assets/screenshots/dashboard.png</Screenshot>
   <Screenshot>https://raw.githubusercontent.com/mmenanno/reddit_chat_bridge/main/.github/assets/screenshots/bot-setup-wizard.png</Screenshot>

@@ -1,6 +1,6 @@
 # unraid-templates - Project Context for Claude Code
 
-A repository of Unraid Community Applications template XML files. One file per containerized project, at the repo root. Each template is hand-maintained alongside its upstream source repo (icons, descriptions, support links) but the XML lives here so CA's appfeed scans only template changes.
+A repository of Unraid Community Applications template XML files. One file per containerized project, in `templates/`. Each template is hand-maintained alongside its upstream source repo (icons, descriptions, support links) but the XML lives here so CA's appfeed scans only template changes.
 
 ## How CA picks up changes
 
@@ -43,7 +43,7 @@ Sourced from [the schema reference thread](https://forums.unraid.net/topic/38619
 | Tag | Status | Purpose |
 | --- | ------ | ------- |
 | `<Overview>` | Required (or `<Description>`) | App blurb on the card. Wins over `<Description>` when both are present. |
-| `<TemplateURL>` | Lint-enforced | Must equal `https://raw.githubusercontent.com/mmenanno/unraid-templates/main/<filename>.xml`. CA dereferences this on every poll; a stale URL silently breaks updates. |
+| `<TemplateURL>` | Lint-enforced | Must equal `https://raw.githubusercontent.com/mmenanno/unraid-templates/main/templates/<filename>.xml`. CA dereferences this on every poll; a stale URL silently breaks updates. |
 | `<Category>` | Lint-enforced | Values must come from the [official whitelist](https://wiki.unraid.net/DockerTemplateSchema). |
 | `<Support>` | Recommended | URL where users report issues. GitHub Issues on the upstream project repo is acceptable for docker app templates. (The FAQ's "insist on a forum thread" applies to plugin templates.) |
 | `<Project>` | Recommended | Upstream homepage / repo. |
@@ -70,7 +70,7 @@ CA-only tags survive in the source XML but get stripped from the user's locally-
 
 `.github/workflows/lint.yml` has four jobs that run on every push and PR:
 
-- **xml** — `xmllint --noout` on every `*.xml` at the repo root. Catches malformed tags, missing CDATA wrapping, unescaped `&`, the usual XML hygiene.
+- **xml** — `xmllint --noout` on every `*.xml` in `templates/`. Catches malformed tags, missing CDATA wrapping, unescaped `&`, the usual XML hygiene.
 - **template-url** — each XML's `<TemplateURL>` must equal `https://raw.githubusercontent.com/${REPO}/main/${file}`. Catches the easy mistake of copy-pasting a template and forgetting to update the URL.
 - **categories** — every space-separated token inside `<Category>` must appear in CA's canonical category list, which the job fetches at runtime from [Squidly271/AppFeed/categoryList.json](https://raw.githubusercontent.com/Squidly271/AppFeed/master/categoryList.json). The JSON uses hyphen separators (`Network-Messenger`); the job converts to colon form (`Network:Messenger`) before comparing. `Status:Stable` and `Status:Beta` are flags rather than categories and live outside the list, so the job allows the `Status:` prefix explicitly.
 - **format** — rejects v1 legacy blocks (`<Networking>`, `<Data>`, `<Environment>`, `<Labels>`) in source XML, and verifies that `<Config>` element attributes are single-spaced. Both rules come from Squid's parser-compatibility warning in the [schema reference thread](https://forums.unraid.net/topic/38619-docker-template-xml-schema/) — the third-party CA parser breaks silently on either.
@@ -86,17 +86,17 @@ There's no formal XSD/RNG for the CA template schema. The closest sources of tru
 
 ```bash
 # Add a new template
-cp existing.xml new-app.xml
-# Edit. Make sure <TemplateURL> ends in /new-app.xml so the lint passes.
-git add new-app.xml
+cp templates/existing.xml templates/new-app.xml
+# Edit. Make sure <TemplateURL> ends in /templates/new-app.xml so the lint passes.
+git add templates/new-app.xml
 git commit -m "Add new-app template"
 git push
 ```
 
 ```bash
 # Bump <Changes> for an upstream release
-# Open new-app.xml, prepend the latest version into the CDATA block,
-# trim the bottom so ~5 entries remain.
+# Open templates/new-app.xml, prepend the latest version into the
+# CDATA block, trim the bottom so ~5 entries remain.
 git commit -am "new-app: bump Changes for vX.Y.Z"
 git push
 ```

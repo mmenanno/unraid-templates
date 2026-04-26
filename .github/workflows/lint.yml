@@ -15,12 +15,12 @@ jobs:
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
 
-      - name: Validate every *.xml at the repo root
+      - name: Validate every *.xml under templates/
         run: |
           shopt -s nullglob
-          files=(*.xml)
+          files=(templates/*.xml)
           if (( ${#files[@]} == 0 )); then
-            echo "::error::No XML templates found at repo root."
+            echo "::error::No XML templates found under templates/."
             exit 1
           fi
           for f in "${files[@]}"; do
@@ -43,7 +43,7 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           shopt -s nullglob
-          files=(*.xml)
+          files=(templates/*.xml)
           fail=0
           for f in "${files[@]}"; do
             expected="https://raw.githubusercontent.com/${REPO}/main/${f}"
@@ -81,7 +81,7 @@ jobs:
       - name: Fetch canonical category list and verify <Category> tokens
         run: |
           shopt -s nullglob
-          files=(*.xml)
+          files=(templates/*.xml)
           curl -fsSL --retry 3 --max-time 30 \
             https://raw.githubusercontent.com/Squidly271/AppFeed/master/categoryList.json \
             -o categoryList.json
@@ -130,7 +130,7 @@ jobs:
       - name: Reject forbidden tags + verify <Config> attribute spacing
         run: |
           shopt -s nullglob
-          files=(*.xml)
+          files=(templates/*.xml)
           forbidden=("Networking" "Data" "Environment" "Labels")
           fail=0
           for f in "${files[@]}"; do
