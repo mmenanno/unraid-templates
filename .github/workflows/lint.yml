@@ -1,0 +1,123 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  xml:
+    name: XML well-formedness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      - name: Validate every *.xml at the repo root
+        run: |
+          shopt -s nullglob
+          files=(*.xml)
+          if (( ${#files[@]} == 0 )); then
+            echo "::error::No XML templates found at repo root."
+            exit 1
+          fi
+          for f in "${files[@]}"; do
+            echo "→ $f"
+            xmllint --noout "$f"
+          done
+
+  template-url:
+    name: TemplateURL self-reference
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # Each template's <TemplateURL> must resolve to the same file's raw URL
+      # on this repo's main branch. CA's appfeed dereferences <TemplateURL> on
+      # update polling; if it points at a different repo or a different
+      # filename, users get the wrong updates or none at all.
+      - name: Verify <TemplateURL> matches the file's raw URL
+        env:
+          REPO: ${{ github.repository }}
+        run: |
+          shopt -s nullglob
+          files=(*.xml)
+          fail=0
+          for f in "${files[@]}"; do
+            expected="https://raw.githubusercontent.com/${REPO}/main/${f}"
+            actual="$(grep -oE '<TemplateURL>[^<]+</TemplateURL>' "$f" | sed -E 's|<TemplateURL>(.*)</TemplateURL>|\1|')"
+            if [[ "$actual" != "$expected" ]]; then
+              echo "::error file=${f}::TemplateURL mismatch"
+              echo "  expected: $expected"
+              echo "  actual:   $actual"
+              fail=1
+            else
+              echo "✓ $f"
+            fi
+          done
+          exit "$fail"
+
+  categories:
+    name: Category whitelist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # Every value in <Category> must be from the official Unraid CA list
+      # published in the Docker Template Schema:
+      # https://wiki.unraid.net/DockerTemplateSchema
+      # CA's submission policy explicitly forbids made-up tags.
+      - name: Verify all <Category> tokens are official
+        run: |
+          shopt -s nullglob
+          files=(*.xml)
+          allowed=$(cat <<'LIST'
+          Backup:
+          Cloud:
+          Downloaders:
+          HomeAutomation:
+          Productivity:
+          Tools:
+          Tools:System
+          Other:
+          MediaApp:Video
+          MediaApp:Music
+          MediaApp:Books
+          MediaApp:Photos
+          MediaApp:Other
+          MediaServer:Video
+          MediaServer:Music
+          MediaServer:Books
+          MediaServer:Photos
+          MediaServer:Other
+          Network:Web
+          Network:DNS
+          Network:FTP
+          Network:Proxy
+          Network:Voip
+          Network:Management
+          Network:Other
+          Network:Messenger
+          Status:Stable
+          Status:Beta
+          LIST
+          )
+          fail=0
+          for f in "${files[@]}"; do
+            categories="$(grep -oE '<Category>[^<]+</Category>' "$f" | sed -E 's|<Category>(.*)</Category>|\1|')"
+            if [[ -z "$categories" ]]; then
+              echo "::error file=${f}::missing <Category>"
+              fail=1
+              continue
+            fi
+            for tok in $categories; do
+              if ! grep -Fxq "$tok" <<< "$allowed"; then
+                echo "::error file=${f}::unknown category token '$tok' (see https://wiki.unraid.net/DockerTemplateSchema)"
+                fail=1
+              fi
+            done
+            (( fail == 0 )) && echo "✓ $f ($categories)"
+          done
+          exit "$fail"
