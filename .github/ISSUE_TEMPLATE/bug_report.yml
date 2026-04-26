@@ -1,0 +1,43 @@
+name: Bug report
+description: Report a problem with an existing template
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: template
+    attributes:
+      label: Which template?
+      description: The template the issue applies to. Pick "Other / not listed" if it's none of these.
+      options:
+        - RedditChatBridge
+        - Other / not listed
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What's wrong?
+      description: Install fails, container won't start, wrong default, missing variable, broken link, etc.
+    validations:
+      required: true
+  - type: input
+    id: unraid_version
+    attributes:
+      label: Unraid version
+      placeholder: e.g. 7.0.1
+    validations:
+      required: true
+  - type: input
+    id: ca_version
+    attributes:
+      label: Community Applications plugin version
+      placeholder: e.g. 2024.10.06
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Container logs, dockerMan errors, or screenshots that help diagnose.
+    validations:
+      required: false

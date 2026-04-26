@@ -1,0 +1,41 @@
+name: New template request
+description: Request a new container template be added to this repo
+title: "[New template] "
+labels: ["new template"]
+body:
+  - type: input
+    id: container_name
+    attributes:
+      label: Container name
+      placeholder: e.g. MyApp
+    validations:
+      required: true
+  - type: input
+    id: project_url
+    attributes:
+      label: Upstream project URL
+      placeholder: https://github.com/owner/repo
+    validations:
+      required: true
+  - type: input
+    id: image
+    attributes:
+      label: Docker image coordinate
+      description: Where the image is published.
+      placeholder: ghcr.io/owner/repo or owner/image on Docker Hub
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why?
+      description: What does this container do, and why would Unraid users want it?
+    validations:
+      required: true
+  - type: input
+    id: docs_url
+    attributes:
+      label: Docs / README link
+      description: A README or docs link so template fields can be filled out accurately.
+    validations:
+      required: false

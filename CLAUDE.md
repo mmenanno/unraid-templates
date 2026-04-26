@@ -109,7 +109,10 @@ The H2 uses the template's `<Name>` value verbatim (CamelCase or whatever the co
 cp templates/existing.xml templates/new-app.xml
 # Edit. Make sure <TemplateURL> ends in /templates/new-app.xml so the lint passes.
 # Then add a README card for it (see "README card format" above).
-git add templates/new-app.xml README.md
+# Also add the new template's <Name> to the dropdowns in
+# .github/ISSUE_TEMPLATE/bug_report.yml and template_update.yml
+# (the "Which template?" options are hand-maintained).
+git add templates/new-app.xml README.md .github/ISSUE_TEMPLATE/
 git commit -m "Add new-app template"
 git push
 ```

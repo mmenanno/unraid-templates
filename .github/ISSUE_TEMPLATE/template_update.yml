@@ -1,0 +1,28 @@
+name: Template update
+description: Request an update to an existing template (new upstream version, new env var, icon rotation, etc.)
+title: "[Update] "
+labels: ["update"]
+body:
+  - type: dropdown
+    id: template
+    attributes:
+      label: Which template?
+      options:
+        - RedditChatBridge
+        - Other / not listed
+    validations:
+      required: true
+  - type: textarea
+    id: change
+    attributes:
+      label: What needs updating?
+      description: New upstream version, added env var, changed port, icon rotation, broken link, etc.
+    validations:
+      required: true
+  - type: input
+    id: upstream_link
+    attributes:
+      label: Upstream release / changelog link
+      placeholder: https://github.com/owner/repo/releases/tag/vX.Y.Z
+    validations:
+      required: false
