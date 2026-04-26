@@ -82,13 +82,34 @@ There's no formal XSD/RNG for the CA template schema. The closest sources of tru
 3. dockerMan source ([limetech/dynamix/.../dynamix.docker.manager](https://github.com/limetech/dynamix/tree/master/plugins/dynamix.docker.manager)) — the canonical-shape generator. Same emhttp-runtime caveat.
 4. The schema reference thread (informal docs, tag-by-tag).
 
+## README card format
+
+Each template gets a card in `README.md` with this exact shape so the page reads consistently as the catalog grows:
+
+```markdown
+## <ContainerName>
+
+<img src="<icon raw URL>" width="96" align="right">
+
+<one-paragraph tagline; lift from the template's <Overview> if there's nothing better>
+
+- **Project:** [<owner>/<repo>](<github URL>)
+- **Template:** [`templates/<filename>.xml`](./templates/<filename>.xml)
+- **Image:** `<GHCR or Docker Hub coordinate>`
+
+---
+```
+
+The H2 uses the template's `<Name>` value verbatim (CamelCase or whatever the container name is, not the slug-style filename), the icon is right-aligned at 96px, and a horizontal rule separates each card.
+
 ## Workflow
 
 ```bash
 # Add a new template
 cp templates/existing.xml templates/new-app.xml
 # Edit. Make sure <TemplateURL> ends in /templates/new-app.xml so the lint passes.
-git add templates/new-app.xml
+# Then add a README card for it (see "README card format" above).
+git add templates/new-app.xml README.md
 git commit -m "Add new-app template"
 git push
 ```

@@ -4,7 +4,7 @@ Unraid Community Applications templates for containers I publish.
 
 ---
 
-## reddit_chat_bridge
+## RedditChatBridge
 
 <img src="https://raw.githubusercontent.com/mmenanno/reddit_chat_bridge/main/app/assets/icons/icon-1024.png" width="96" align="right">
 
