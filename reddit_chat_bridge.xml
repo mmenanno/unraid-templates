@@ -14,7 +14,7 @@
   <WebUI>http://[IP]:[PORT:4567]/</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/mmenanno/unraid-templates/main/reddit_chat_bridge.xml</TemplateURL>
   <Icon>https://raw.githubusercontent.com/mmenanno/reddit_chat_bridge/main/app/assets/icons/icon-1024.png</Icon>
-  <ExtraParams/>
+  <ExtraParams>--restart=unless-stopped</ExtraParams>
   <PostArgs/>
   <CPUset/>
   <DateInstalled/>
