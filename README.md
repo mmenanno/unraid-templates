@@ -1,4 +1,4 @@
-# mmenanno/unraid-templates
+# Unraid Templates
 
 Unraid Community Applications templates for containers I publish.
 
