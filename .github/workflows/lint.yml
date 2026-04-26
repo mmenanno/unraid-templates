@@ -60,50 +60,34 @@ jobs:
           exit "$fail"
 
   categories:
-    name: Category whitelist
+    name: Category whitelist (live)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
 
-      # Every value in <Category> must be from the official Unraid CA list
-      # published in the Docker Template Schema:
-      # https://wiki.unraid.net/DockerTemplateSchema
-      # CA's submission policy explicitly forbids made-up tags.
-      - name: Verify all <Category> tokens are official
+      # Source of truth: the canonical category list lives in CA's appfeed
+      # repo at Squidly271/AppFeed/categoryList.json. Fetching it at lint time
+      # eliminates drift — when CA adds a new category (recent additions
+      # include AI, GameServers, Security, Network:VPN, Network:Privacy),
+      # this lint job picks it up automatically.
+      #
+      # Format note: the JSON uses hyphens (Network-Messenger), the XML uses
+      # colons (Network:Messenger). CA normalizes between them; we match by
+      # converting the JSON form to the XML form.
+      #
+      # Status:Stable / Status:Beta are also valid in <Category> but live
+      # outside the category list (they're flags, not categories), so we
+      # allow that prefix explicitly.
+      - name: Fetch canonical category list and verify <Category> tokens
         run: |
           shopt -s nullglob
           files=(*.xml)
-          allowed=$(cat <<'LIST'
-          Backup:
-          Cloud:
-          Downloaders:
-          HomeAutomation:
-          Productivity:
-          Tools:
-          Tools:System
-          Other:
-          MediaApp:Video
-          MediaApp:Music
-          MediaApp:Books
-          MediaApp:Photos
-          MediaApp:Other
-          MediaServer:Video
-          MediaServer:Music
-          MediaServer:Books
-          MediaServer:Photos
-          MediaServer:Other
-          Network:Web
-          Network:DNS
-          Network:FTP
-          Network:Proxy
-          Network:Voip
-          Network:Management
-          Network:Other
-          Network:Messenger
-          Status:Stable
-          Status:Beta
-          LIST
-          )
+          curl -fsSL --retry 3 --max-time 30 \
+            https://raw.githubusercontent.com/Squidly271/AppFeed/master/categoryList.json \
+            -o categoryList.json
+          # JSON is a flat array; strip quotes/brackets/commas to get
+          # one entry per line, then convert hyphens to colons.
+          allowed="$(jq -r '.[].Cat' categoryList.json | tr '-' ':')"
           fail=0
           for f in "${files[@]}"; do
             categories="$(grep -oE '<Category>[^<]+</Category>' "$f" | sed -E 's|<Category>(.*)</Category>|\1|')"
@@ -113,11 +97,56 @@ jobs:
               continue
             fi
             for tok in $categories; do
+              # Status:Stable / Status:Beta are flags, not categories — allow.
+              if [[ "$tok" == Status:* ]]; then
+                continue
+              fi
               if ! grep -Fxq "$tok" <<< "$allowed"; then
-                echo "::error file=${f}::unknown category token '$tok' (see https://wiki.unraid.net/DockerTemplateSchema)"
+                echo "::error file=${f}::unknown category token '$tok' (see https://raw.githubusercontent.com/Squidly271/AppFeed/master/categoryList.json)"
                 fail=1
               fi
             done
             (( fail == 0 )) && echo "✓ $f ($categories)"
+          done
+          exit "$fail"
+
+  format:
+    name: dockerMan-canonical format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      # Two checks the CA parser is sensitive to:
+      #
+      # 1. Forbidden tags. v1 schema blocks (Networking/Data/Environment/Labels)
+      #    were superseded by <Config> in Unraid 6.10; dockerMan stopped
+      #    emitting them on save and the source should not include them.
+      #
+      # 2. <Config> attribute spacing. Per Squid's parser-compatibility
+      #    warning in the schema thread, extra whitespace between attributes
+      #    on a <Config> element breaks the CA parser silently. dockerMan
+      #    generates them single-spaced. Anything other than ' ' (one space)
+      #    between attributes is rejected.
+      - name: Reject forbidden tags + verify <Config> attribute spacing
+        run: |
+          shopt -s nullglob
+          files=(*.xml)
+          forbidden=("Networking" "Data" "Environment" "Labels")
+          fail=0
+          for f in "${files[@]}"; do
+            for tag in "${forbidden[@]}"; do
+              if grep -qE "<${tag}[> /]" "$f"; then
+                echo "::error file=${f}::forbidden tag <${tag}> found in source. v1 legacy (Networking/Data/Environment/Labels) is superseded by <Config>."
+                fail=1
+              fi
+            done
+            # Look for any <Config ... > line where attribute pairs are
+            # separated by something other than a single space. dockerMan
+            # never emits double spaces or tabs between attributes.
+            if grep -nE '<Config[^>]*(  | \t|\t)' "$f"; then
+              echo "::error file=${f}::extra whitespace between <Config> attributes (CA's parser is sensitive to this)."
+              fail=1
+            fi
+            (( fail == 0 )) && echo "✓ $f"
           done
           exit "$fail"

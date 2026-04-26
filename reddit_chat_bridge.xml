@@ -59,4 +59,5 @@ Full history: https://github.com/mmenanno/reddit_chat_bridge/blob/main/CHANGELOG
   <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="Host user id the container should run as. Default 99 matches Unraid's `nobody`." Type="Variable" Display="advanced" Required="false" Mask="false">99</Config>
   <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="Host group id the container should run as. Default 100 matches Unraid's `users`." Type="Variable" Display="advanced" Required="false" Mask="false">100</Config>
   <Config Name="UMASK" Target="UMASK" Default="022" Mode="" Description="File-mode creation mask. 022 (default) = files 644, dirs 755." Type="Variable" Display="advanced" Required="false" Mask="false">022</Config>
+  <TailscaleStateDir/>
 </Container>

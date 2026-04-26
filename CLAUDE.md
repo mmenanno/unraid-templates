@@ -32,8 +32,9 @@ Concrete rules (from [the schema reference thread](https://forums.unraid.net/top
 
   Tags in `[brackets]` are CA-only — dockerMan strips them on save (it doesn't know about them). They live in this repo's source XML, CA reads them from `<TemplateURL>` on its 2-hour poll, and the user's locally-saved copy is stripped of them. The locally-saved XML is dockerMan's runtime config; the URL-fetched source is the CA card source.
 
+  After the `Config×N` block, dockerMan-7.2+ also emits `<TailscaleStateDir/>`. Including it in source is safe (older Unraid versions ignore unknown empty elements; CA's parser only validates required fields, not the absence of extras), and matching the post-save shape exactly keeps round-trip diffs minimal.
+
 - **v1 legacy blocks (`<Networking>`, `<Data>`, `<Environment>`, `<Labels>`)** were superseded by `<Config>` blocks in Unraid 6.10. dockerMan no longer emits them on save and the source should not include them.
-- **`<TailscaleStateDir/>`** is Unraid 7.2+. dockerMan adds it on save based on the host's version; older Unraid versions don't recognize it. Source should not include it.
 
 ## Tag inventory
 
@@ -67,11 +68,19 @@ CA-only tags survive in the source XML but get stripped from the user's locally-
 
 ## Lint workflow
 
-`.github/workflows/lint.yml` has three jobs that run on every push and PR:
+`.github/workflows/lint.yml` has four jobs that run on every push and PR:
 
-- **xml** — `xmllint --noout` on every `*.xml` at the repo root. Catches malformed tags, missing CDATA wrapping, the usual XML hygiene.
+- **xml** — `xmllint --noout` on every `*.xml` at the repo root. Catches malformed tags, missing CDATA wrapping, unescaped `&`, the usual XML hygiene.
 - **template-url** — each XML's `<TemplateURL>` must equal `https://raw.githubusercontent.com/${REPO}/main/${file}`. Catches the easy mistake of copy-pasting a template and forgetting to update the URL.
-- **categories** — every space-separated token inside `<Category>` must appear in the official whitelist baked into the workflow. The list comes from the [Docker Template Schema](https://wiki.unraid.net/DockerTemplateSchema); update both the schema link and the workflow's allowlist if Unraid adds categories.
+- **categories** — every space-separated token inside `<Category>` must appear in CA's canonical category list, which the job fetches at runtime from [Squidly271/AppFeed/categoryList.json](https://raw.githubusercontent.com/Squidly271/AppFeed/master/categoryList.json). The JSON uses hyphen separators (`Network-Messenger`); the job converts to colon form (`Network:Messenger`) before comparing. `Status:Stable` and `Status:Beta` are flags rather than categories and live outside the list, so the job allows the `Status:` prefix explicitly.
+- **format** — rejects v1 legacy blocks (`<Networking>`, `<Data>`, `<Environment>`, `<Labels>`) in source XML, and verifies that `<Config>` element attributes are single-spaced. Both rules come from Squid's parser-compatibility warning in the [schema reference thread](https://forums.unraid.net/topic/38619-docker-template-xml-schema/) — the third-party CA parser breaks silently on either.
+
+There's no formal XSD/RNG for the CA template schema. The closest sources of truth, in descending order of precision:
+
+1. The canonical category list ([AppFeed/categoryList.json](https://raw.githubusercontent.com/Squidly271/AppFeed/master/categoryList.json)) — the only machine-readable bit.
+2. The CA plugin parser ([Squidly271/community.applications/.../helpers.php](https://github.com/Squidly271/community.applications/blob/master/source/community.applications/usr/local/emhttp/plugins/community.applications/include/helpers.php)) — `readXmlFile`, `makeXML`, `fixAttributes`, `fixTemplates`, `addMissingVars`. PHP, not portable as-is, but skim-readable.
+3. dockerMan source ([limetech/dynamix/.../dynamix.docker.manager](https://github.com/limetech/dynamix/tree/master/plugins/dynamix.docker.manager)) — the canonical-shape generator. Same emhttp-runtime caveat.
+4. The schema reference thread (informal docs, tag-by-tag).
 
 ## Workflow
 
