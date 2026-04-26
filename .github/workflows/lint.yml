@@ -142,8 +142,10 @@ jobs:
             done
             # Look for any <Config ... > line where attribute pairs are
             # separated by something other than a single space. dockerMan
-            # never emits double spaces or tabs between attributes.
-            if grep -nE '<Config[^>]*(  | \t|\t)' "$f"; then
+            # never emits double spaces or tabs between attributes. PCRE
+            # mode (-P) is required so \t is interpreted as a tab — in
+            # POSIX ERE \t means the literal letter t.
+            if grep -nP '<Config[^>]*(  |\t)' "$f"; then
               echo "::error file=${f}::extra whitespace between <Config> attributes (CA's parser is sensitive to this)."
               fail=1
             fi
