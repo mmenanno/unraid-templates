@@ -14,17 +14,71 @@ CA's appfeed (Squidly271/AppFeed) re-scans every approved template repo on a ~2 
 
 This means the lint workflow is the only gate between a `git push` and every CA user seeing the change. Treat lint failures as production breaks.
 
-## Template field rules
+## Format constraints
 
-These are enforced by `.github/workflows/lint.yml` and described in [Squid's Docker FAQ](https://forums.unraid.net/topic/57181-docker-faq/#comment-566084).
+Per [the schema reference thread](https://forums.unraid.net/topic/38619-docker-template-xml-schema/), CA's parser is third-party and only tolerates the exact shape that Unraid's `dockerMan` produces when you Save a template in **Settings → Docker Authoring Mode → Add Container → fill → Save**. Manual edits can break the parser silently.
 
-- **`<TemplateURL>`** must equal `https://raw.githubusercontent.com/mmenanno/unraid-templates/main/<filename>.xml`. CA dereferences this on every poll; a stale URL silently breaks updates.
-- **`<Category>`** values must come from the official list in the [Docker Template Schema](https://wiki.unraid.net/DockerTemplateSchema). Made-up tags are rejected by the lint job and (more importantly) by the CA review.
-- **`<Support>`** points to a thread on the Unraid forums (any subforum is fine; a moderator will move it to Docker Containers). Until the support thread exists, GitHub Issues is a placeholder; before submission it must be updated.
-- **`<Icon>`** should be self-hosted. Reddit_chat_bridge's icon lives on its own repo's raw URL. External CDNs are discouraged because rotation breaks the card.
-- **`<Screenshot>`** (one tag per URL, multiple lines for multiple screenshots) renders as a carousel on the CA app card. Pull from the upstream repo's existing curated screenshots — no need to maintain a parallel set here. `<Video>` and `<Photo>` are also supported per [Squid's CA assets post](https://forums.unraid.net/topic/57181-docker-faq/?do=findComment&comment=1083096) but rarely useful.
-- **`<Changes>`** is wrapped in CDATA so markdown placeholders like `/unarchive <query>` don't get parsed as XML elements. Keep the block to the most recent ~5 user-visible versions; full history links out to the upstream `CHANGELOG.md`.
-- **Host paths** (`<HostDir>`, `<Config>` `Default=`) are pre-filled with the conventional `/mnt/user/appdata/<container>` even though Squid's FAQ recommends against it. This matches the linuxserver / binhex convention and is what Unraid users expect — the FAQ recommendation predates that consensus.
+Concrete rules from that thread:
+
+- **No extra whitespace inside `<Config>` element attributes.** Squid calls this out specifically: extra spacing between attributes ("breaks" in the third-party parser sense) will result in errors or wrong values when CA installs the container. dockerMan generates them single-spaced; we match that.
+- **`&` must be `&amp;`.** Unescaped ampersands cause the template to silently disappear from CA. Apply to all text content (descriptions, URLs with query strings, etc).
+- **`<Overview>` takes precedence over `<Description>`.** Per the schema thread, when both are present, "Description is completely ignored." We currently keep both because most modern CA templates do, but if the card ever shows the wrong text, consolidate into Overview and drop Description.
+- **At least one of `<Overview>` or `<Description>` is required and non-empty.** The card won't render without it.
+- **When in doubt, round-trip through dockerMan.** Test box: enable Authoring Mode, paste this template's URL into Add Container, hit Save with no edits. Diff the resulting XML against this repo's file. Any difference dockerMan introduces is the canonical shape; this repo should match.
+
+## Tag inventory
+
+Sourced from [the schema reference thread](https://forums.unraid.net/topic/38619-docker-template-xml-schema/) and Squid's [Docker FAQ](https://forums.unraid.net/topic/57181-docker-faq/#comment-566084).
+
+### Required (one of)
+
+| Tag | Purpose |
+| --- | ------- |
+| `<Overview>` or `<Description>` | App blurb on the card. `<Overview>` wins when both are present. |
+
+### Lint-enforced (we check these in CI)
+
+| Tag | Purpose |
+| --- | ------- |
+| `<TemplateURL>` | Must equal `https://raw.githubusercontent.com/mmenanno/unraid-templates/main/<filename>.xml`. CA dereferences this on every poll; a stale URL silently breaks updates. |
+| `<Category>` | Values must come from the [official whitelist](https://wiki.unraid.net/DockerTemplateSchema). Made-up tags are rejected by both the lint job and Squid's review. |
+
+### Strongly recommended
+
+| Tag | Purpose |
+| --- | ------- |
+| `<Support>` | Unraid forum thread URL. Any subforum at submission time — a moderator relocates it. Until the forum thread exists, a placeholder (e.g. GitHub Issues) is fine; must be updated before CA submission. |
+| `<Project>` | Upstream homepage / repo. |
+| `<Icon>` | Self-hosted PNG. External CDNs discouraged because URL rotation breaks the card identity. We use the upstream repo's raw URL. |
+| `<Screenshot>` | Carousel on the app card. One tag per URL; multiple lines for multiple screenshots. We reuse the upstream README's curated set. |
+| `<Changes>` | Hand-maintained changelog block, CDATA-wrapped so markdown like `/unarchive <query>` doesn't get parsed as XML. Keep ~5 most recent user-visible versions; link out to the upstream `CHANGELOG.md` for the full history. |
+| `<License>` | Short license name (e.g. `MIT`). Renders on the card. |
+| `<ReadMe>` | URL to a markdown readme. Surfaces a "Read Me" button in the CA UI. We point at the upstream repo's README. Unraid 6.10-rc3+ generates this automatically when saving via dockerMan. |
+| `<ExtraSearchTerms>` | Space-separated terms to widen search hits beyond `<Name>` and `<Description>`. |
+| `<Requires>` | Free-text note about additional system requirements. Unraid 6.10+ generates this in authoring mode. |
+
+### Optional / rarely useful
+
+| Tag | Purpose |
+| --- | ------- |
+| `<Video>`, `<Photo>` | Same idea as `<Screenshot>` for video / single-photo media. |
+| `<Branch>` | When the image has multiple tags users should pick from (e.g. `:latest`, `:beta`); CA prompts for a choice. We ship one image, one tag — N/A. |
+| `<Date>` / `<DateInstalled>` | Container created/updated timestamp. CA tracks ingestion date independently; only adds info when the upstream cadence diverges from the appfeed cadence. |
+| `<Beta>` | Set by the [Application Categorizer plugin](https://forums.unraid.net/topic/38431-plug-in-application-template-categorizer/) when a template is flagged beta. We just use `Status:Beta` in `<Category>` instead. |
+
+### Deprecated / handled by CA profile
+
+| Tag | Status |
+| --- | ------ |
+| `<DonateText>`, `<DonateLink>`, `<DonateImg>` | As of 2021-02-21, donation links live on the CA profile, not the template. Squid's note: "all you have to do is fill out the appropriate links within the CA profile and those links will get carried over to the templates automatically." We currently leave `<DonateText>`/`<DonateLink>` for the pre-CA-profile case (they harmlessly render nothing without `<DonateImg>`); after CA submission, the profile takes over and these tags can be removed. |
+
+### Internal-only (do not use)
+
+CA emits other tags into the XML it passes to dockerMan at install time. Those are CA-internal state, not template inputs. Don't add them.
+
+## Host paths
+
+`<HostDir>` and `<Config>` `Default=` are pre-filled with the conventional `/mnt/user/appdata/<container>` even though Squid's FAQ recommends against pre-filling host paths. This matches the linuxserver / binhex convention and is what Unraid users expect — the FAQ recommendation predates that consensus.
 
 ## Workflow
 

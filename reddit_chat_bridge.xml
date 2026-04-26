@@ -9,6 +9,9 @@
   <Privileged>false</Privileged>
   <Support>https://github.com/mmenanno/reddit_chat_bridge/issues</Support>
   <Project>https://github.com/mmenanno/reddit_chat_bridge</Project>
+  <ReadMe>https://github.com/mmenanno/reddit_chat_bridge/blob/main/README.md</ReadMe>
+  <License>MIT</License>
+  <ExtraSearchTerms>reddit discord matrix chat bridge messaging self-hosted</ExtraSearchTerms>
   <Overview>Self-hosted bridge between Reddit Chat and a private Discord server. Reddit DMs land in per-conversation #dm-* channels with the sender's snoovatar; replies relay back under your Reddit identity. All config happens in the bcrypt-protected admin web UI after first run.</Overview>
   <Category>Network:Messenger Tools:System Status:Stable</Category>
   <WebUI>http://[IP]:[PORT:4567]/</WebUI>
