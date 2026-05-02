@@ -23,7 +23,7 @@ Self-hosted bridge between Reddit Chat and a private Discord server. Reddit DMs 
 
 <img src="https://raw.githubusercontent.com/mmenanno/gasmoney/main/app/assets/icons/icon-1024.png" width="96" align="right" alt="GasMoney icon">
 
-Self-hosted, single-screen calculator that estimates the gas cost of any trip you've driven (or are about to drive). Feed it GasBuddy CSV exports — or wire up the optional auto-sync that drives a bundled headless Chromium through GasBuddy's login — and it works out per-trip cost from the fuel-economy and pump-price values bracketing the trip date.
+Self-hosted, single-screen calculator that estimates the gas cost of any trip you've driven (or are about to drive). Feed it GasBuddy CSV exports, or wire up the optional auto-sync that drives a bundled Chromium through GasBuddy's login, and it works out per-trip cost from the fuel-economy and pump-price values bracketing the trip date.
 
 - **Project:** [mmenanno/gasmoney](https://github.com/mmenanno/gasmoney)
 - **Template:** [`templates/gasmoney.xml`](./templates/gasmoney.xml)

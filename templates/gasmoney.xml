@@ -12,7 +12,7 @@
   <ReadMe>https://github.com/mmenanno/gasmoney/blob/main/README.md</ReadMe>
   <License>MIT</License>
   <ExtraSearchTerms>gasbuddy fuel gas trip cost calculator vehicle car mileage expense self-hosted</ExtraSearchTerms>
-  <Overview>Self-hosted, single-screen calculator that estimates the gas cost of any trip you've driven (or are about to drive). Feed it GasBuddy CSV exports — or wire up the optional auto-sync that drives a bundled headless Chromium through GasBuddy's login — and it works out per-trip cost from the fuel-economy and pump-price values bracketing the trip date. Pinned vehicles get $/km dashboard tiles (latest fillup + 5-fillup average). Saved trips, manual fillup entry, and a year-by-year backfill mode are all built in.</Overview>
+  <Overview>Self-hosted, single-screen calculator that estimates the gas cost of any trip you've driven (or are about to drive). Feed it GasBuddy CSV exports, or wire up the optional auto-sync that drives a bundled Chromium through GasBuddy's login, and it works out per-trip cost from the fuel-economy and pump-price values bracketing the trip date. Pinned vehicles get $/km dashboard tiles (latest fillup + 5-fillup average). Saved trips, manual fillup entry, and a year-by-year backfill mode are all built in.</Overview>
   <Category>Productivity Tools:Utilities Status:Stable</Category>
   <WebUI>http://[IP]:[PORT:9292]/</WebUI>
   <TemplateURL>https://raw.githubusercontent.com/mmenanno/unraid-templates/main/templates/gasmoney.xml</TemplateURL>
@@ -30,7 +30,7 @@
   <Requires/>
   <Changes><![CDATA[
 ### v1.0.0 - 2026-05-02
-- First stable release. No functional change versus 0.10.10 — the bump signals that the 0.10.x polish cycle is done. Trip-cost calculator, pinned-vehicle $/km tiles, CSV import, GasBuddy auto-sync (bundled headless Chromium), backfill, vehicle linking, manual fillup entry, saved trips, and the installable PWA are all in.
+- First stable release. No functional change versus 0.10.10; the bump signals that the 0.10.x polish cycle is done. Trip-cost calculator, pinned-vehicle $/km tiles, CSV import, GasBuddy auto-sync (bundled Chromium), backfill, vehicle linking, manual fillup entry, saved trips, and the installable PWA are all in.
 - This Unraid Community Applications template added.
 
 ### v0.10.1 - 2026-05-02
@@ -40,12 +40,12 @@
 - New **Backfill** button on the Sync page. Walks GasBuddy fuel logs year-by-year from current down to 2010, stopping after two consecutive empty years. Decoupled from regular sync via a new `mode: :recent | :backfill` parameter on `Sync.run`.
 
 ### v0.9.0 - 2026-05-02
-- **Refresh garage** button next to Vehicle linking — pulls the GasBuddy vehicle list on demand instead of bundling it into every fillup sync.
+- **Refresh garage** button next to Vehicle linking. Pulls the GasBuddy vehicle list on demand instead of bundling it into every fillup sync.
 - **Ignore** option in the linking dropdown so unwanted remote vehicles are skipped permanently rather than every run.
 - Fillups ledger now shows a per-row provenance glyph: `↻` for fillups synced from GasBuddy, `✎` for ones added manually or via CSV import.
 
 ### v0.8.0 - 2026-05-02
-- Auth flow now uses a bundled headless Chromium (via Ferrum) instead of FlareSolverr. The `cf_clearance` cookie that FlareSolverr returned was bound to FlareSolverr's network identity; the bundled-browser approach keeps cookies portable because login fires from the same container that subsequently makes the data calls. FlareSolverr support and its config UI are gone.
+- Auth flow now uses a bundled Chromium (via Ferrum) instead of FlareSolverr. The `cf_clearance` cookie that FlareSolverr returned was bound to FlareSolverr's network identity; the bundled-browser approach keeps cookies portable because login fires from the same container that subsequently makes the data calls. As of v0.8.3 the browser runs headed against an Xvfb virtual framebuffer (Cloudflare was fingerprinting `--headless` mode and hanging the iam.gasbuddy.com challenge). FlareSolverr support and its config UI are gone.
 - Image grew by ~150 MB because Chromium is now bundled. `CHROMIUM_PATH` env var lets you point the browser at a different binary if needed; default is `/usr/bin/chromium`.
 
 Full history: https://github.com/mmenanno/gasmoney/blob/main/CHANGELOG.md
