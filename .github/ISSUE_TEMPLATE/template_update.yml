@@ -9,6 +9,7 @@ body:
       label: Which template?
       options:
         - RedditChatBridge
+        - GasMoney
         - Other / not listed
     validations:
       required: true
