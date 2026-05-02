@@ -22,7 +22,7 @@ Concrete rules (from [the schema reference thread](https://forums.unraid.net/top
 - **At least one of `<Overview>` or `<Description>` is required and non-empty.**
 - **Element ordering** matches the dockerMan-7.2.4 output:
 
-  ```
+  ```text
   Name → Repository → Registry → Network → MyIP → Shell → Privileged →
   Support → Project → ReadMe → [License → ExtraSearchTerms] → Overview →
   Category → WebUI → TemplateURL → Icon → [Screenshot×N] → ExtraParams →
