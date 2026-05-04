@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<CommunityApplications>
+  <Profile>A small, hand-maintained collection of Unraid Community Applications templates for containers I build and publish under github.com/mmenanno. Each app has its own upstream GitHub repo where development, releases, and support happen; the template's Support button links there, and that's the right place to file bugs or request features. New apps are added as I publish them.</Profile>
+  <Icon>https://github.com/mmenanno.png</Icon>
+  <WebPage>https://github.com/mmenanno/unraid-templates</WebPage>
+  <DonateLink>https://buymeacoffee.com/mmenanno</DonateLink>
+  <DonateText>Buy me a coffee</DonateText>
+</CommunityApplications>

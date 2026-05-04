@@ -28,6 +28,16 @@ jobs:
             xmllint --noout "$f"
           done
 
+      # ca_profile.xml is the repository-level profile XML CA reads when
+      # rendering the maintainer's profile card. It lives at the repo root,
+      # not under templates/, so it falls outside the loop above.
+      - name: Validate ca_profile.xml at repo root
+        run: |
+          if [[ -f ca_profile.xml ]]; then
+            echo "→ ca_profile.xml"
+            xmllint --noout ca_profile.xml
+          fi
+
   template-url:
     name: TemplateURL self-reference
     runs-on: ubuntu-latest
@@ -108,6 +118,82 @@ jobs:
             done
             (( fail == 0 )) && echo "✓ $f ($categories)"
           done
+          exit "$fail"
+
+  profile:
+    name: ca_profile.xml schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+      # Sources:
+      #   https://ca.unraid.net/submit/help/repository-info-xml
+      #   https://ca.unraid.net/submit/help/xml-field-reference
+      #
+      # ca_profile.xml is read by CA when rendering this repo's maintainer
+      # profile card. The required field is <Profile>; the rest are optional
+      # but constrained to a documented set. CA's parser silently ignores
+      # unknown elements, so a typo like <Webpage> would never surface as a
+      # visible error. This job catches schema drift at push time.
+      - name: Verify ca_profile.xml schema
+        if: hashFiles('ca_profile.xml') != ''
+        run: |
+          f=ca_profile.xml
+          fail=0
+
+          # Root element must be <CommunityApplications>.
+          root=$(xmllint --xpath 'name(/*)' "$f")
+          if [[ "$root" != "CommunityApplications" ]]; then
+            echo "::error file=${f}::root element must be <CommunityApplications>, got <${root}>"
+            fail=1
+          fi
+
+          # <Profile> is required, must occur exactly once, and must be non-empty.
+          profile_count=$(xmllint --xpath 'count(/CommunityApplications/Profile)' "$f")
+          if [[ "$profile_count" != "1" ]]; then
+            echo "::error file=${f}::expected exactly one <Profile> element, found ${profile_count}"
+            fail=1
+          else
+            profile_text=$(xmllint --xpath 'normalize-space(/CommunityApplications/Profile)' "$f")
+            if [[ -z "$profile_text" ]]; then
+              echo "::error file=${f}::<Profile> must be non-empty"
+              fail=1
+            fi
+          fi
+
+          # Whitelist of accepted direct children of <CommunityApplications>.
+          # Any other tag is rejected since CA silently drops unknowns.
+          allowed=(Profile Forum WebPage Icon Discord Facebook Photo Reddit Twitter Video DonateLink DonateText)
+          # The file is flat (no nesting beyond direct children), so a simple
+          # tag-name extraction is sufficient. Skip the root element itself.
+          children=$(grep -oE '<[A-Za-z][A-Za-z0-9]*' "$f" | tr -d '<' | sort -u)
+          for c in $children; do
+            [[ "$c" == "CommunityApplications" ]] && continue
+            ok=0
+            for a in "${allowed[@]}"; do
+              [[ "$c" == "$a" ]] && ok=1 && break
+            done
+            if (( ok == 0 )); then
+              echo "::error file=${f}::unknown element <${c}>; CA's parser silently ignores unknowns"
+              fail=1
+            fi
+          done
+
+          # URL-typed fields, when present, must look like http(s):// URLs.
+          # DonateText is text, not a URL, so it's excluded.
+          url_fields=(Forum WebPage Icon Discord Facebook Photo Reddit Twitter Video DonateLink)
+          for tag in "${url_fields[@]}"; do
+            val=$(xmllint --xpath "string(/CommunityApplications/${tag})" "$f")
+            if [[ -n "$val" && ! "$val" =~ ^https?:// ]]; then
+              echo "::error file=${f}::<${tag}> must be an http(s):// URL, got '${val}'"
+              fail=1
+            fi
+          done
+
+          (( fail == 0 )) && echo "✓ $f"
           exit "$fail"
 
   format:
