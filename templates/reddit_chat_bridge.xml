@@ -31,6 +31,12 @@
   <DonateLink>https://buymeacoffee.com/mmenanno</DonateLink>
   <Requires/>
   <Changes><![CDATA[
+### v1.16.0 - 2026-06-19
+- Spillover categories: when your "Reddit DMs" category hits Discord's 50-channel limit, the bridge auto-creates overflow categories (Reddit DMs 2, 3, ...) and copies your category's private permissions so they stay hidden. Toggle in settings. Re-invite the bot (setup guide step 3) so it picks up the new Manage Roles permission this needs.
+- New settings to limit how far back chats sync: a relative "last N days" lookback and/or an absolute cutoff date, so a big backlog of old DMs doesn't flood Discord.
+- Full resync now restores archived rooms too (ended/hidden chats stay hidden).
+- Setup guide adds a step-by-step Reddit session-cookie walkthrough.
+
 ### v1.12.5 - 2026-04-26
 - Fix: leaving `SESSION_SECRET` blank no longer crashes the web UI on first boot. The bridge now auto-generates and persists one as documented.
 
@@ -46,9 +52,6 @@
 - New `/unarchive <query>` and `/restore <query>` slash commands with fuzzy match plus confirm-button flow.
 - `/status` now warns when the Reddit cookie is within 7 days of expiry.
 - Every slash command response is now an ephemeral embed in the bridge palette instead of plain content.
-
-### v1.11.6 - 2026-04-26
-- Multi-arch images: every release now publishes `linux/amd64` and `linux/arm64` under one manifest list. Docker pulls the right arch automatically.
 
 Full history: https://github.com/mmenanno/reddit_chat_bridge/blob/main/CHANGELOG.md
   ]]></Changes>
