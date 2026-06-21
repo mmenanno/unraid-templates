@@ -10,7 +10,7 @@ jobs:
     name: XML well-formedness
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
@@ -42,7 +42,7 @@ jobs:
     name: TemplateURL self-reference
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # Each template's <TemplateURL> must resolve to the same file's raw URL
       # on this repo's main branch. CA's appfeed dereferences <TemplateURL> on
@@ -73,7 +73,7 @@ jobs:
     name: Category whitelist (live)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # Source of truth: the canonical category list lives in CA's appfeed
       # repo at Squidly271/AppFeed/categoryList.json. Fetching it at lint time
@@ -124,7 +124,7 @@ jobs:
     name: ca_profile.xml schema
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
@@ -200,7 +200,7 @@ jobs:
     name: dockerMan-canonical format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # Two checks the CA parser is sensitive to:
       #
