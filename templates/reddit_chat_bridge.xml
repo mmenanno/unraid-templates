@@ -31,6 +31,10 @@
   <DonateLink>https://buymeacoffee.com/mmenanno</DonateLink>
   <Requires/>
   <Changes><![CDATA[
+### v1.16.5 - 2026-10-10
+- Dependency refresh across the 1.16.x releases: Ruby 4.0.6, discordrb 3.8.0, Rails components (ActiveRecord/ActiveSupport) 8.1.4, Faraday 2.14.4, Rack 3.2.7, and other gem updates.
+- Security: bumped a build-time-only transitive dependency (source-map-js) to patch a denial-of-service advisory. No JS ships in the runtime image, so there is no behavior change for running bridges.
+
 ### v1.16.0 - 2026-06-19
 - Spillover categories: when your "Reddit DMs" category hits Discord's 50-channel limit, the bridge auto-creates overflow categories (Reddit DMs 2, 3, ...) and copies your category's private permissions so they stay hidden. Toggle in settings. Re-invite the bot (setup guide step 3) so it picks up the new Manage Roles permission this needs.
 - New settings to limit how far back chats sync: a relative "last N days" lookback and/or an absolute cutoff date, so a big backlog of old DMs doesn't flood Discord.
@@ -47,11 +51,6 @@
 ### v1.12.3 - 2026-04-26
 - `/resync` slash command restored after a one-version detour.
 - `/status` embed now shows the `/sync` cadence (long-poll, 10s idle).
-
-### v1.12.0 - 2026-04-26
-- New `/unarchive <query>` and `/restore <query>` slash commands with fuzzy match plus confirm-button flow.
-- `/status` now warns when the Reddit cookie is within 7 days of expiry.
-- Every slash command response is now an ephemeral embed in the bridge palette instead of plain content.
 
 Full history: https://github.com/mmenanno/reddit_chat_bridge/blob/main/CHANGELOG.md
   ]]></Changes>
