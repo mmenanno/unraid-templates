@@ -31,6 +31,9 @@
   <DonateLink>https://buymeacoffee.com/mmenanno</DonateLink>
   <Requires/>
   <Changes><![CDATA[
+### v1.16.6 - 2026-10-16
+- Fix: a failed Matrix token auto-refresh no longer floods `#app-logs` while the bridge is paused. The refresh retries at most every 5 minutes, and the "Auto-refresh failed" warning only posts when the error message changes.
+
 ### v1.16.5 - 2026-10-10
 - Dependency refresh across the 1.16.x releases: Ruby 4.0.6, discordrb 3.8.0, Rails components (ActiveRecord/ActiveSupport) 8.1.4, Faraday 2.14.4, Rack 3.2.7, and other gem updates.
 - Security: bumped a build-time-only transitive dependency (source-map-js) to patch a denial-of-service advisory. No JS ships in the runtime image, so there is no behavior change for running bridges.
@@ -47,10 +50,6 @@
 ### v1.12.4 - 2026-04-26
 - Container honors `PUID`, `PGID`, and `UMASK` env vars at startup. Defaults to `99:100` (Unraid's `nobody:users`) so `/mnt/user/appdata/reddit_chat_bridge` works without a manual `chown`.
 - This Unraid Community Applications template added.
-
-### v1.12.3 - 2026-04-26
-- `/resync` slash command restored after a one-version detour.
-- `/status` embed now shows the `/sync` cadence (long-poll, 10s idle).
 
 Full history: https://github.com/mmenanno/reddit_chat_bridge/blob/main/CHANGELOG.md
   ]]></Changes>
