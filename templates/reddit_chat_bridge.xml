@@ -31,6 +31,12 @@
   <DonateLink>https://buymeacoffee.com/mmenanno</DonateLink>
   <Requires/>
   <Changes><![CDATA[
+### v1.16.8 - 2026-10-29
+- Fix: Matrix `429 M_LIMIT_EXCEEDED` sync responses no longer post a "Sync loop crashed" alert to `#app-status` and a "Sync recovered" notice to `#app-logs` on every occurrence. Rate limits are retried with the same backoff as server errors, and an alert only fires if the limit outlasts the full backoff.
+
+### v1.16.7 - 2026-10-23
+- Ruby bumped from 4.0.6 to 4.0.7, with Bundler and all gems updated to their latest versions.
+
 ### v1.16.6 - 2026-10-16
 - Fix: a failed Matrix token auto-refresh no longer floods `#app-logs` while the bridge is paused. The refresh retries at most every 5 minutes, and the "Auto-refresh failed" warning only posts when the error message changes.
 
@@ -43,13 +49,6 @@
 - New settings to limit how far back chats sync: a relative "last N days" lookback and/or an absolute cutoff date, so a big backlog of old DMs doesn't flood Discord.
 - Full resync now restores archived rooms too (ended/hidden chats stay hidden).
 - Setup guide adds a step-by-step Reddit session-cookie walkthrough.
-
-### v1.12.5 - 2026-04-26
-- Fix: leaving `SESSION_SECRET` blank no longer crashes the web UI on first boot. The bridge now auto-generates and persists one as documented.
-
-### v1.12.4 - 2026-04-26
-- Container honors `PUID`, `PGID`, and `UMASK` env vars at startup. Defaults to `99:100` (Unraid's `nobody:users`) so `/mnt/user/appdata/reddit_chat_bridge` works without a manual `chown`.
-- This Unraid Community Applications template added.
 
 Full history: https://github.com/mmenanno/reddit_chat_bridge/blob/main/CHANGELOG.md
   ]]></Changes>
