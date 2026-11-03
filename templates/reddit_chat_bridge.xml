@@ -31,6 +31,9 @@
   <DonateLink>https://buymeacoffee.com/mmenanno</DonateLink>
   <Requires/>
   <Changes><![CDATA[
+### v1.16.9 - 2026-11-02
+- Fix: short Reddit rate limits and network blips no longer post a "Sync loop gave up after retries" alert to `#app-status`. Upstream outages only alert once they have lasted 10 minutes; shorter ones recover quietly. Unexpected errors still alert immediately.
+
 ### v1.16.8 - 2026-10-29
 - Fix: Matrix `429 M_LIMIT_EXCEEDED` sync responses no longer post a "Sync loop crashed" alert to `#app-status` and a "Sync recovered" notice to `#app-logs` on every occurrence. Rate limits are retried with the same backoff as server errors, and an alert only fires if the limit outlasts the full backoff.
 
@@ -43,12 +46,6 @@
 ### v1.16.5 - 2026-10-10
 - Dependency refresh across the 1.16.x releases: Ruby 4.0.6, discordrb 3.8.0, Rails components (ActiveRecord/ActiveSupport) 8.1.4, Faraday 2.14.4, Rack 3.2.7, and other gem updates.
 - Security: bumped a build-time-only transitive dependency (source-map-js) to patch a denial-of-service advisory. No JS ships in the runtime image, so there is no behavior change for running bridges.
-
-### v1.16.0 - 2026-06-19
-- Spillover categories: when your "Reddit DMs" category hits Discord's 50-channel limit, the bridge auto-creates overflow categories (Reddit DMs 2, 3, ...) and copies your category's private permissions so they stay hidden. Toggle in settings. Re-invite the bot (setup guide step 3) so it picks up the new Manage Roles permission this needs.
-- New settings to limit how far back chats sync: a relative "last N days" lookback and/or an absolute cutoff date, so a big backlog of old DMs doesn't flood Discord.
-- Full resync now restores archived rooms too (ended/hidden chats stay hidden).
-- Setup guide adds a step-by-step Reddit session-cookie walkthrough.
 
 Full history: https://github.com/mmenanno/reddit_chat_bridge/blob/main/CHANGELOG.md
   ]]></Changes>
